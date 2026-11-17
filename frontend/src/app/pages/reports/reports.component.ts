@@ -16,12 +16,14 @@ import { KPIData, DepartmentStat, PriorityStat } from '../../core/models/models'
           <p class="text-secondary small mb-0">Plant operational reliability, MTTR (Mean Time to Resolve), and departmental resolution metrics</p>
         </div>
         <div class="d-flex gap-2">
-          <a [href]="api.getExportCsvUrl()" class="btn btn-outline-dark btn-sm d-flex align-items-center">
-            <i class="bi bi-filetype-csv me-1"></i> Export CSV
-          </a>
-          <a [href]="api.getExportExcelUrl()" class="btn btn-success btn-sm d-flex align-items-center">
-            <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel (.xlsx)
-          </a>
+          <button (click)="downloadCsv()" [disabled]="exportingCsv" class="btn btn-outline-dark btn-sm d-flex align-items-center">
+            <span *ngIf="exportingCsv" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!exportingCsv" class="bi bi-filetype-csv me-1"></i> Export CSV
+          </button>
+          <button (click)="downloadExcel()" [disabled]="exportingExcel" class="btn btn-success btn-sm d-flex align-items-center">
+            <span *ngIf="exportingExcel" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!exportingExcel" class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel (.xlsx)
+          </button>
         </div>
       </div>
 
@@ -130,6 +132,8 @@ export class ReportsComponent implements OnInit {
 
   kpis: KPIData | null = null;
   departmentStats: DepartmentStat[] = [];
+  exportingCsv = false;
+  exportingExcel = false;
 
   ngOnInit(): void {
     this.loadReportsData();
@@ -144,6 +148,48 @@ export class ReportsComponent implements OnInit {
     this.api.getDepartmentStats().subscribe({
       next: (depts) => this.departmentStats = depts,
       error: (e) => console.error(e)
+    });
+  }
+
+  downloadCsv(): void {
+    this.exportingCsv = true;
+    this.api.exportCsv().subscribe({
+      next: (blob) => {
+        this.exportingCsv = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lkm_tickets_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.exportingCsv = false;
+        alert('Failed to export CSV: ' + (err.error?.detail || err.message));
+      }
+    });
+  }
+
+  downloadExcel(): void {
+    this.exportingExcel = true;
+    this.api.exportExcel().subscribe({
+      next: (blob) => {
+        this.exportingExcel = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lkm_tickets_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.exportingExcel = false;
+        alert('Failed to export Excel: ' + (err.error?.detail || err.message));
+      }
     });
   }
 

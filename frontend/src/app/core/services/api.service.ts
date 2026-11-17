@@ -134,6 +134,25 @@ export class ApiService {
     return this.http.get<NotificationRecord[]>(`${this.baseUrl}/simulator/notifications`);
   }
 
+  // --- Export Methods with Bearer Token ---
+  exportCsv(departmentId?: number): Observable<Blob> {
+    let params = new HttpParams();
+    if (departmentId) params = params.set('department_id', departmentId.toString());
+    return this.http.get(`${this.baseUrl}/reports/export/csv`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  exportExcel(departmentId?: number): Observable<Blob> {
+    let params = new HttpParams();
+    if (departmentId) params = params.set('department_id', departmentId.toString());
+    return this.http.get(`${this.baseUrl}/reports/export/excel`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
   // Export URLs
   getExportCsvUrl(): string {
     return `${this.baseUrl}/reports/export/csv`;

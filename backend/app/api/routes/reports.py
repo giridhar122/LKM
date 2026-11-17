@@ -162,11 +162,13 @@ def get_ticket_trends(
 def export_tickets_csv(
     department_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    supervisor: User = Depends(require_supervisor)
+    current_user: User = Depends(get_current_user)
 ):
     """Export all tickets to CSV format."""
     query = db.query(Ticket)
-    if department_id:
+    if current_user.role == "DEPARTMENT_OWNER" and current_user.department_id:
+        query = query.filter(Ticket.department_id == current_user.department_id)
+    elif department_id:
         query = query.filter(Ticket.department_id == department_id)
     tickets = query.order_by(Ticket.id.desc()).all()
 
@@ -209,11 +211,13 @@ def export_tickets_csv(
 def export_tickets_excel(
     department_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    supervisor: User = Depends(require_supervisor)
+    current_user: User = Depends(get_current_user)
 ):
     """Export all tickets to Excel (.xlsx) format."""
     query = db.query(Ticket)
-    if department_id:
+    if current_user.role == "DEPARTMENT_OWNER" and current_user.department_id:
+        query = query.filter(Ticket.department_id == current_user.department_id)
+    elif department_id:
         query = query.filter(Ticket.department_id == department_id)
     tickets = query.order_by(Ticket.id.desc()).all()
 
