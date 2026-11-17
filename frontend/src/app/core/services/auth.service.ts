@@ -23,7 +23,49 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  private isStandalone(): boolean {
+    return typeof window !== 'undefined' && 
+           window.location.hostname !== 'localhost' && 
+           window.location.hostname !== '127.0.0.1';
+  }
+
+  private buildDemoUser(email: string): LoginResponse {
+    const isMaint = email.includes('maint');
+    const isAdmin = email.includes('admin');
+    const role = isAdmin ? 'ADMIN' : (isMaint ? 'DEPARTMENT_OWNER' : 'SUPERVISOR');
+    const fullName = isAdmin 
+      ? 'LKM Administrator' 
+      : (isMaint ? 'Venkatesh Rao (Maintenance Lead)' : 'Karthik Raja (Supervisor)');
+    
+    const demoUser: User = {
+      id: isAdmin ? 1 : (isMaint ? 2 : 3),
+      email,
+      full_name: fullName,
+      role: role as any,
+      department_id: isMaint ? 2 : undefined,
+      is_active: true,
+      created_at: new Date().toISOString()
+    };
+
+    const res: LoginResponse = {
+      access_token: 'demo_token_' + Date.now(),
+      token_type: 'bearer',
+      user: demoUser
+    };
+
+    localStorage.setItem('lkm_token', res.access_token);
+    localStorage.setItem('lkm_user', JSON.stringify(demoUser));
+    this.currentUserState.set(demoUser);
+    return res;
+  }
+
   login(email: string, password: string): Observable<LoginResponse> {
+    // If hosted on GitHub Pages or static host, log in immediately in demo mode
+    if (this.isStandalone()) {
+      return of(this.buildDemoUser(email));
+    }
+
+    // On localhost, attempt backend authentication
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password }).pipe(
       tap(res => {
         localStorage.setItem('lkm_token', res.access_token);
@@ -31,26 +73,9 @@ export class AuthService {
         this.currentUserState.set(res.user);
       }),
       catchError(err => {
-        // Fallback for standalone GitHub Pages demo
+        // Fallback if localhost backend is not running
         if (password.includes('123') || email.includes('lkm.com')) {
-          const role = email.includes('admin') ? 'ADMIN' : (email.includes('maint') ? 'DEPARTMENT_OWNER' : 'SUPERVISOR');
-          const demoUser: User = {
-            id: 1,
-            email,
-            full_name: email.includes('admin') ? 'LKM Administrator' : (email.includes('maint') ? 'Venkatesh Rao (Maintenance Lead)' : 'Karthik Raja (Supervisor)'),
-            role: role as any,
-            is_active: true,
-            created_at: new Date().toISOString()
-          };
-          const fallbackRes: LoginResponse = {
-            access_token: 'demo_token_' + Date.now(),
-            token_type: 'bearer',
-            user: demoUser
-          };
-          localStorage.setItem('lkm_token', fallbackRes.access_token);
-          localStorage.setItem('lkm_user', JSON.stringify(demoUser));
-          this.currentUserState.set(demoUser);
-          return of(fallbackRes);
+          return of(this.buildDemoUser(email));
         }
         return throwError(() => err);
       })
