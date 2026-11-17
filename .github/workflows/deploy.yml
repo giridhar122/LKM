@@ -1,3 +1,4 @@
+# LKM SmartDesk - Automated GitHub Pages Deployment Pipeline
 name: Deploy Angular App to GitHub Pages
 
 on:
