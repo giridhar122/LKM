@@ -8,22 +8,11 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [CommonModule],
   template: `
     <header class="app-header bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center shadow-sm">
-      <div class="d-flex align-items-center gap-3">
-        <span class="badge bg-light text-dark border px-2 py-1">
-          <i class="bi bi-building-gear text-primary me-1"></i>
-          LKM Industrial Operations
+      <div class="d-flex align-items-center">
+        <span class="text-secondary fw-semibold small">
+          <i class="bi bi-building-gear me-1 text-primary"></i>
+          LKM Industrial Operations &bull; Plant 01
         </span>
-        <div class="system-status d-none d-md-flex align-items-center gap-2" style="font-size: 0.78rem;">
-          <span class="badge bg-success-subtle text-success border border-success-subtle">
-            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> MySQL Online
-          </span>
-          <span class="badge bg-info-subtle text-info border border-info-subtle">
-            <i class="bi bi-stars me-1"></i> Gemini AI Ready
-          </span>
-          <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-            <i class="bi bi-whatsapp me-1"></i> WhatsApp Active
-          </span>
-        </div>
       </div>
 
       <div class="d-flex align-items-center gap-3">
