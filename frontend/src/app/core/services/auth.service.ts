@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, of, throwError } from 'rxjs';
 import { User } from '../models/models';
 
 interface LoginResponse {
@@ -29,6 +29,30 @@ export class AuthService {
         localStorage.setItem('lkm_token', res.access_token);
         localStorage.setItem('lkm_user', JSON.stringify(res.user));
         this.currentUserState.set(res.user);
+      }),
+      catchError(err => {
+        // Fallback for standalone GitHub Pages demo
+        if (password.includes('123') || email.includes('lkm.com')) {
+          const role = email.includes('admin') ? 'ADMIN' : (email.includes('maint') ? 'DEPARTMENT_OWNER' : 'SUPERVISOR');
+          const demoUser: User = {
+            id: 1,
+            email,
+            full_name: email.includes('admin') ? 'LKM Administrator' : (email.includes('maint') ? 'Venkatesh Rao (Maintenance Lead)' : 'Karthik Raja (Supervisor)'),
+            role: role as any,
+            is_active: true,
+            created_at: new Date().toISOString()
+          };
+          const fallbackRes: LoginResponse = {
+            access_token: 'demo_token_' + Date.now(),
+            token_type: 'bearer',
+            user: demoUser
+          };
+          localStorage.setItem('lkm_token', fallbackRes.access_token);
+          localStorage.setItem('lkm_user', JSON.stringify(demoUser));
+          this.currentUserState.set(demoUser);
+          return of(fallbackRes);
+        }
+        return throwError(() => err);
       })
     );
   }
