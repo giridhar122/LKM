@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     WHATSAPP_API_VERSION: str = "v20.0"
     WHATSAPP_SIMULATION_MODE: bool = True
 
+    # Telegram Bot API
+    TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_ENABLED: bool = True
+    TELEGRAM_POLLING_MODE: bool = True
+
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:4200",

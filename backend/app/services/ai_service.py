@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # Fallback department keyword maps for robust offline classification or fallback
 DEPARTMENT_RULES = {
     "Maintenance": {
-        "keywords": ["machine", "breakdown", "motor", "leak", "oil", "bearing", "conveyor", "pump", "stopped working", "not working", "maintenance", "repair", "tool wear", "cylinder", "pneumatic", "hydraulic", "power failure", "equipment failure"],
+        "keywords": ["machine breakdown", "hydraulic breakdown", "motor breakdown", "stopped working", "equipment failure", "power failure", "hydraulic leak", "machine", "breakdown", "motor", "leak", "oil", "bearing", "conveyor", "pump", "not working", "maintenance", "repair", "tool wear", "cylinder", "pneumatic", "hydraulic"],
         "default_priority": "Critical"
     },
     "Purchase": {

@@ -8,9 +8,9 @@
 
 ## 1. Executive Summary
 
-**LKM SmartDesk** is a modern, enterprise-grade industrial issue reporting and ticket management system. It bridges factory shop-floor operators and plant maintenance supervisors by allowing operational issues to be reported via **ordinary conversational WhatsApp messages**.
+**LKM SmartDesk** is a modern, enterprise-grade industrial issue reporting and ticket management system. It bridges factory shop-floor operators and plant maintenance supervisors by allowing operational issues to be reported via **ordinary conversational WhatsApp or Telegram messages**.
 
-An AI Operations Engine (powered by **Google Gemini**) extracts structured ticket data from natural-language messages in real-time, automatically detects the responsible department and priority, generates a sequential ticket ID (`LKM-YYYY-00001`), alerts the reporting employee via WhatsApp confirmation, and provides plant supervisors with a comprehensive role-based web dashboard.
+An AI Operations Engine (powered by **Google Gemini**) extracts structured ticket data from natural-language messages in real-time, automatically detects the responsible department and priority, generates a sequential ticket ID (`LKM-YYYY-00001`), alerts the reporting employee via instant confirmation, and provides plant supervisors with a comprehensive role-based web dashboard.
 
 ---
 
@@ -25,7 +25,7 @@ An AI Operations Engine (powered by **Google Gemini**) extracts structured ticke
 | **Database** | **MySQL 8.0** | Relational database with foreign keys, indexes, and sequences |
 | **ORM & Migrations**| **SQLAlchemy 2.0** + **PyMySQL** + **Alembic** | Connection pooling and versioned schema migrations |
 | **AI Intelligence** | **Google Gemini API** (`gemini-2.5-flash`) | Structured JSON extraction, confidence scoring, supervisor review flag |
-| **Messaging** | **Official WhatsApp Cloud API** (Meta) | Meta Graph API v20.0+, HMAC webhook verification, and Sandbox |
+| **Messaging** | **Telegram Bot API** & **WhatsApp Cloud API** | Real Telegram Bot (long-polling / webhook) & Meta WhatsApp Cloud API |
 | **Security & RBAC** | **JWT (Bearer)** + **Bcrypt** | Role-based authorization (`ADMIN`, `SUPERVISOR`, `DEPARTMENT_OWNER`) |
 
 ---

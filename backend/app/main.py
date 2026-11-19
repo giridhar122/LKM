@@ -10,8 +10,11 @@ from app.api.routes.tickets import router as tickets_router
 from app.api.routes.departments import router as departments_router
 from app.api.routes.employees import router as employees_router
 from app.api.routes.whatsapp import router as whatsapp_router
+from app.api.routes.telegram import router as telegram_router
 from app.api.routes.simulator import router as simulator_router
 from app.api.routes.reports import router as reports_router
+from app.services.telegram_polling import start_telegram_polling, stop_telegram_polling
+import asyncio
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,7 +25,7 @@ logger = logging.getLogger("lkm_smartdesk")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan event to ensure database tables and seed records exist upon startup."""
+    """Lifespan event to ensure database tables and seed records exist upon startup, and start background listeners."""
     logger.info(f"Starting {settings.PROJECT_NAME} backend...")
     db = SessionLocal()
     try:
@@ -31,7 +34,18 @@ async def lifespan(app: FastAPI):
         logger.error(f"Error during database initialization: {e}")
     finally:
         db.close()
+
+    # Start Telegram background poller if enabled and token present
+    polling_task = None
+    if settings.TELEGRAM_ENABLED and settings.TELEGRAM_POLLING_MODE:
+        polling_task = asyncio.create_task(start_telegram_polling())
+
     yield
+
+    # Clean shutdown of Telegram poller
+    if polling_task:
+        await stop_telegram_polling()
+        polling_task.cancel()
     logger.info(f"Shutting down {settings.PROJECT_NAME} backend...")
 
 
@@ -60,6 +74,7 @@ app.include_router(tickets_router, prefix=settings.API_V1_STR)
 app.include_router(departments_router, prefix=settings.API_V1_STR)
 app.include_router(employees_router, prefix=settings.API_V1_STR)
 app.include_router(whatsapp_router, prefix=settings.API_V1_STR)
+app.include_router(telegram_router, prefix=settings.API_V1_STR)
 app.include_router(simulator_router, prefix=settings.API_V1_STR)
 app.include_router(reports_router, prefix=settings.API_V1_STR)
 

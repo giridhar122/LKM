@@ -63,7 +63,12 @@ def _map_ticket_to_out(ticket: Ticket, db: Session) -> TicketOut:
         employee_phone=ticket.employee_phone,
         source_platform=ticket.source_platform,
         reported_by_employee_id=ticket.reported_by_employee_id,
-        reported_by_name=emp.full_name if emp else None,
+        reported_by_name=(
+            emp.full_name if emp else (
+                (msg.raw_payload.get("sender_name") if msg and msg.raw_payload else None) or
+                ("Telegram Operator" if ticket.source_platform == "TELEGRAM" else "Shop Floor Operator")
+            )
+        ),
         reported_by_code=emp.employee_code if emp else None,
         assigned_to_user_id=ticket.assigned_to_user_id,
         assigned_to_name=assignee.full_name if assignee else None,

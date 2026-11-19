@@ -42,9 +42,53 @@ class WhatsAppCloudProvider(BaseMessagingProvider):
 
     def parse_webhook_payload(self, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
-        Extracts sender phone, message text, and WhatsApp message ID from Meta webhook format.
+        Extracts sender phone, message text, and WhatsApp message ID from Meta or Green-API webhook format.
         """
         try:
+            # 1. Green-API Format (Group & 1-to-1 messages)
+            if "typeWebhook" in payload or "senderData" in payload:
+                webhook_type = payload.get("typeWebhook")
+                if webhook_type and webhook_type != "incomingMessageReceived":
+                    return None  # Ignore delivery receipts, outgoing statuses, etc.
+
+                sender_data = payload.get("senderData", {})
+                message_data = payload.get("messageData", {})
+
+                # Extract text
+                msg_type = message_data.get("typeMessage", "")
+                text = ""
+                if msg_type == "textMessage":
+                    text = message_data.get("textMessageData", {}).get("textMessage", "")
+                elif msg_type == "extendedTextMessage":
+                    text = message_data.get("extendedTextMessageData", {}).get("text", "")
+                else:
+                    text = f"[{msg_type.upper()} ATTACHMENT REPORTED]"
+
+                if not text.strip():
+                    return None
+
+                # Extract sender phone
+                raw_sender = sender_data.get("sender", "")  # e.g. "919876543210@c.us"
+                sender_num = raw_sender.split("@")[0] if raw_sender else "9876543210"
+                phone = f"+{sender_num}" if not sender_num.startswith("+") else sender_num
+
+                msg_id = payload.get("idMessage") or f"green_{uuid.uuid4().hex[:14]}"
+                chat_id = sender_data.get("chatId", "")
+                sender_name = sender_data.get("senderName") or "Shop Floor Operator"
+
+                logger.info(f"Green-API Webhook received from {phone} (Group/Chat: {chat_id}): '{text}'")
+
+                return {
+                    "provider_message_id": msg_id,
+                    "sender_phone": phone,
+                    "message_text": text,
+                    "timestamp": payload.get("timestamp"),
+                    "chat_id": chat_id,
+                    "sender_name": sender_name,
+                    "raw": payload
+                }
+
+            # 2. Meta Cloud API Format
             entries = payload.get("entry", [])
             if not entries:
                 return None
@@ -80,7 +124,7 @@ class WhatsAppCloudProvider(BaseMessagingProvider):
                 "raw": payload
             }
         except Exception as e:
-            logger.error(f"Error parsing Meta WhatsApp webhook payload: {e}")
+            logger.error(f"Error parsing WhatsApp webhook payload: {e}")
             return None
 
     def send_text_message(self, recipient_phone: str, text: str) -> Dict[str, Any]:

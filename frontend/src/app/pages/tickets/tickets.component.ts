@@ -140,7 +140,8 @@ import { Ticket, Department, User, TicketUpdatePayload } from '../../core/models
                     {{ t.reported_by_name || 'Shop Floor Operator' }}
                   </div>
                   <small class="text-muted d-flex align-items-center">
-                    <i class="bi bi-whatsapp text-success me-1" style="font-size: 0.75rem;"></i>
+                    <i *ngIf="t.source_platform === 'TELEGRAM' || t.employee_phone?.startsWith('tg:')" class="bi bi-telegram text-info me-1" style="font-size: 0.8rem;"></i>
+                    <i *ngIf="t.source_platform !== 'TELEGRAM' && !t.employee_phone?.startsWith('tg:')" class="bi bi-whatsapp text-success me-1" style="font-size: 0.75rem;"></i>
                     {{ t.employee_phone }}
                   </small>
                 </td>
@@ -217,11 +218,15 @@ import { Ticket, Department, User, TicketUpdatePayload } from '../../core/models
               <div class="row g-4">
                 <!-- Left Column: Details & Actions -->
                 <div class="col-12 col-lg-7">
-                  <!-- Original WhatsApp Message Card -->
-                  <div class="card mb-3 border-success border-2 shadow-sm">
-                    <div class="card-header bg-success-subtle text-success-emphasis py-2 d-flex justify-content-between align-items-center">
-                      <span class="fw-semibold small"><i class="bi bi-whatsapp me-1"></i> Original Employee WhatsApp Message</span>
-                      <small class="badge bg-success">{{ activeTicket.source_platform }}</small>
+                  <!-- Original Message Card -->
+                  <div class="card mb-3 border-2 shadow-sm" [ngClass]="activeTicket.source_platform === 'TELEGRAM' ? 'border-info' : 'border-success'">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center" [ngClass]="activeTicket.source_platform === 'TELEGRAM' ? 'bg-info-subtle text-info-emphasis' : 'bg-success-subtle text-success-emphasis'">
+                      <span class="fw-semibold small">
+                        <i *ngIf="activeTicket.source_platform === 'TELEGRAM'" class="bi bi-telegram me-1"></i>
+                        <i *ngIf="activeTicket.source_platform !== 'TELEGRAM'" class="bi bi-whatsapp me-1"></i>
+                        Original Employee Incident Message
+                      </span>
+                      <small class="badge" [ngClass]="activeTicket.source_platform === 'TELEGRAM' ? 'bg-info text-dark' : 'bg-success'">{{ activeTicket.source_platform }}</small>
                     </div>
                     <div class="card-body bg-white py-3">
                       <p class="mb-2 font-monospace small bg-light p-2 rounded border">
