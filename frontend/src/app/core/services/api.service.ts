@@ -142,14 +142,13 @@ const INITIAL_NOTIFICATIONS: NotificationRecord[] = [
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8000/api/v1';
+  private baseUrl = 'https://lkm-5q6u.onrender.com/api/v1';
 
   constructor(private http: HttpClient) {}
 
   private isStandalone(): boolean {
-    return typeof window !== 'undefined' && 
-           window.location.hostname !== 'localhost' && 
-           window.location.hostname !== '127.0.0.1';
+    // Cloud backend is active and live on Render
+    return false;
   }
 
   // --- LocalStorage Store Handlers ---

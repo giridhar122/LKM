@@ -14,7 +14,7 @@ interface LoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000/api/v1';
+  private apiUrl = 'https://lkm-5q6u.onrender.com/api/v1';
   private currentUserState = signal<User | null>(this.getStoredUser());
 
   public currentUser = computed(() => this.currentUserState());
@@ -24,9 +24,7 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   private isStandalone(): boolean {
-    return typeof window !== 'undefined' && 
-           window.location.hostname !== 'localhost' && 
-           window.location.hostname !== '127.0.0.1';
+    return false;
   }
 
   private buildDemoUser(email: string): LoginResponse {
@@ -90,7 +88,13 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('lkm_token');
+    const token = localStorage.getItem('lkm_token');
+    if (token && token.startsWith('demo_token_')) {
+      localStorage.removeItem('lkm_token');
+      localStorage.removeItem('lkm_user');
+      return null;
+    }
+    return token;
   }
 
   hasRole(allowedRoles: string[]): boolean {
@@ -99,6 +103,10 @@ export class AuthService {
   }
 
   private getStoredUser(): User | null {
+    const token = localStorage.getItem('lkm_token');
+    if (token && token.startsWith('demo_token_')) {
+      return null;
+    }
     const userJson = localStorage.getItem('lkm_user');
     if (!userJson) return null;
     try {
