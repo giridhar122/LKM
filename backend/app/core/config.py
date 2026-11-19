@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     DB_USER: str = "root"
     DB_PASSWORD: str = ""
     DB_NAME: str = "lkm_smartdesk"
-    USE_SQLITE_FALLBACK: bool = False
+    USE_SQLITE_FALLBACK: bool = True
     SQLITE_DB_PATH: str = "lkm_smartdesk.db"
 
     @property
@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     WHATSAPP_SIMULATION_MODE: bool = True
 
     # Telegram Bot API
-    TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_BOT_TOKEN: str = "8930332308:AAGT2OAoK__wK8kK3pxb_t0PjlOKhW4a9Xg"
     TELEGRAM_ENABLED: bool = True
     TELEGRAM_POLLING_MODE: bool = True
 
@@ -62,6 +62,7 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://giridhar122.github.io",
+        "*",
     ]
 
     model_config = SettingsConfigDict(
